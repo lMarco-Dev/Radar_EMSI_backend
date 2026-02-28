@@ -5,7 +5,9 @@ import lombok.*;
 
 @Entity
 @Table(name = "tipo_comportamiento")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,7 +17,7 @@ public class TipoComportamiento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 100, unique = true)
     private String nombre;
 
     @Column(columnDefinition = "TEXT")

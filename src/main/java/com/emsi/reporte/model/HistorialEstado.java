@@ -10,7 +10,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "historial_estado")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

@@ -9,7 +9,9 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "empresa")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

@@ -5,7 +5,9 @@ import lombok.*;
 
 @Entity
 @Table(name = "causa")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,7 +17,7 @@ public class Causa {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 150)
+    @Column(nullable = false, length = 150, unique = true)
     private String nombre;
 
     @Column(nullable = false)
