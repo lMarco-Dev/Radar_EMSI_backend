@@ -30,15 +30,15 @@ public class EmpresaController {
         return ResponseEntity.ok(ApiResponse.ok(empresaService.obtenerPorId(id)));
     }
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<EmpresaResponseDTO>> crear(@Valid @RequestBody EmpresaRequestDTO dto) {
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<ApiResponse<EmpresaResponseDTO>> crear(@Valid @ModelAttribute EmpresaRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Empresa creada exitosamente", empresaService.crear(dto)));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
     public ResponseEntity<ApiResponse<EmpresaResponseDTO>> actualizar(@PathVariable Long id,
-                                                                       @Valid @RequestBody EmpresaRequestDTO dto) {
+                                                                      @Valid @ModelAttribute EmpresaRequestDTO dto) {
         return ResponseEntity.ok(ApiResponse.ok("Empresa actualizada", empresaService.actualizar(id, dto)));
     }
 

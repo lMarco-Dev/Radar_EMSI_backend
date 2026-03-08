@@ -13,12 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import com.emsi.shared.service.CloudinaryService;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class EmpresaServiceImpl implements EmpresaService {
 
     private final EmpresaRepository empresaRepository;
+    private final CloudinaryService cloudinaryService;
 
     @Value("${app.frontend-url:http://localhost:5173}")
     private String frontendUrl;
@@ -26,10 +29,25 @@ public class EmpresaServiceImpl implements EmpresaService {
     @Override
     @Transactional
     public EmpresaResponseDTO crear(EmpresaRequestDTO dto) {
+        String logoUrl = null;
+        if (empresaRepository.existsByNombreIgnoreCase(dto.getNombre()))
+            throw new RuntimeException("El nombre de la empresa ya está registrado.");
+        if (empresaRepository.existsByRuc(dto.getRuc()))
+            throw new RuntimeException("El RUC ya se encuentra registrado.");
+
+        if (dto.getLogo() != null && !dto.getLogo().isEmpty()) {
+            try {
+                Map result = cloudinaryService.upload(dto.getLogo(), "logos-empresas");
+                logoUrl = (String) result.get("secure_url");
+            } catch (Exception e) {
+                throw new RuntimeException("Error al subir el logo: " + e.getMessage());
+            }
+        }
+
         Empresa empresa = Empresa.builder()
                 .nombre(dto.getNombre())
                 .ruc(dto.getRuc())
-                .logoUrl(dto.getLogoUrl())
+                .logoUrl(logoUrl)
                 .build();
         return toDTO(empresaRepository.save(empresa));
     }
@@ -38,9 +56,30 @@ public class EmpresaServiceImpl implements EmpresaService {
     @Transactional
     public EmpresaResponseDTO actualizar(Long id, EmpresaRequestDTO dto) {
         Empresa empresa = findById(id);
+
         empresa.setNombre(dto.getNombre());
         empresa.setRuc(dto.getRuc());
-        empresa.setLogoUrl(dto.getLogoUrl());
+
+        if (empresaRepository.existsByNombreIgnoreCaseAndIdNot(dto.getNombre(), id))
+            throw new RuntimeException("El nombre ya pertenece a otra empresa.");
+        if (empresaRepository.existsByRucAndIdNot(dto.getRuc(), id))
+            throw new RuntimeException("El RUC ya pertenece a otra empresa.");
+
+        if (dto.getLogo() != null && !dto.getLogo().isEmpty()) {
+            try {
+                Map result = cloudinaryService.upload(dto.getLogo(), "logos-empresas");
+                String secureUrl = (String) result.get("secure_url");
+
+                if (secureUrl != null && !secureUrl.isBlank()) {
+                    empresa.setLogoUrl(secureUrl);
+                } else {
+                    empresa.setLogoUrl(null);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Error al procesar el logo en el servidor");
+            }
+        }
+
         return toDTO(empresaRepository.save(empresa));
     }
 

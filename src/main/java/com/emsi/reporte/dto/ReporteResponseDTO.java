@@ -14,6 +14,7 @@ import java.util.List;
 public class ReporteResponseDTO {
     private Long id;
     private Long empresaId;
+    private String folio;
     private String empresaNombre;
     private Long tipoComportamientoId;
     private String tipoComportamientoNombre;

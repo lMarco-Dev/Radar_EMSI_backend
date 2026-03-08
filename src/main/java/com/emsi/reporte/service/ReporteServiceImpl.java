@@ -25,6 +25,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.emsi.shared.service.CloudinaryService;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +44,7 @@ public class ReporteServiceImpl implements ReporteService {
     private final TipoComportamientoRepository tipoRepository;
     private final CausaRepository causaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final CloudinaryService cloudinaryService;
 
     @Override
     @Transactional
@@ -59,8 +62,11 @@ public class ReporteServiceImpl implements ReporteService {
             causa = causaRepository.findById(dto.getCausaId())
                     .orElseThrow(() -> new ResourceNotFoundException("Causa no encontrada"));
         }
+        String folioUnico = "REP-" + java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+
         Reporte reporte = Reporte.builder()
                 .empresa(empresa)
+                .folio(folioUnico)
                 .tipoComportamiento(tipo)
                 .causa(causa)
                 .nombreReportante(dto.getNombreReportante())
@@ -72,14 +78,27 @@ public class ReporteServiceImpl implements ReporteService {
                 .lugarEspecifico(dto.getLugarEspecifico())
                 .camposDinamicos(dto.getCamposDinamicos())
                 .build();
+
         Reporte saved = reporteRepository.save(reporte);
-        if (dto.getEvidencias() != null) {
-            dto.getEvidencias().forEach(e -> evidenciaRepository.save(
-                    Evidencia.builder().reporte(saved)
-                            .urlCloudinary(e.getUrlCloudinary())
-                            .publicIdCloudinary(e.getPublicIdCloudinary())
-                            .build()));
+
+        // Nuevo: Procesar múltiples imágenes hacia Cloudinary
+        if (dto.getEvidencias() != null && !dto.getEvidencias().isEmpty()) {
+            for (MultipartFile archivo : dto.getEvidencias()) {
+                if (!archivo.isEmpty()) {
+                    try {
+                        Map result = cloudinaryService.upload(archivo, "evidencias-reportes");
+                        evidenciaRepository.save(Evidencia.builder()
+                                .reporte(saved)
+                                .urlCloudinary((String) result.get("secure_url"))
+                                .publicIdCloudinary((String) result.get("public_id"))
+                                .build());
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error al subir evidencia: " + e.getMessage());
+                    }
+                }
+            }
         }
+
         return toDTO(saved, true);
     }
 
@@ -145,6 +164,7 @@ public class ReporteServiceImpl implements ReporteService {
         }
         return ReporteResponseDTO.builder()
                 .id(r.getId())
+                .folio(r.getFolio())
                 .empresaId(r.getEmpresa().getId())
                 .empresaNombre(r.getEmpresa().getNombre())
                 .tipoComportamientoId(r.getTipoComportamiento().getId())
@@ -153,14 +173,17 @@ public class ReporteServiceImpl implements ReporteService {
                 .causaNombre(r.getCausa() != null ? r.getCausa().getNombre() : null)
                 .estado(r.getEstado())
                 .nombreReportante(r.getNombreReportante())
-                .area(r.getArea()).turno(r.getTurno())
+                .area(r.getArea())
+                .turno(r.getTurno())
                 .descripcionComportamiento(r.getDescripcionComportamiento())
                 .medidaContencion(r.getMedidaContencion())
                 .fechaOcurrido(r.getFechaOcurrido())
                 .lugarEspecifico(r.getLugarEspecifico())
                 .camposDinamicos(r.getCamposDinamicos())
-                .evidencias(evidencias).historial(historial)
-                .createdAt(r.getCreatedAt()).updatedAt(r.getUpdatedAt())
+                .evidencias(evidencias)
+                .historial(historial)
+                .createdAt(r.getCreatedAt())
+                .updatedAt(r.getUpdatedAt())
                 .build();
     }
 }

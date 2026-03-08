@@ -44,10 +44,10 @@ public class ReportePublicoController {
         return ResponseEntity.ok(ApiResponse.ok(catalogos));
     }
 
-    @PostMapping("/reportes")
+    @PostMapping(value = "/reportes", consumes = {"multipart/form-data"})
     public ResponseEntity<ApiResponse<ReporteResponseDTO>> crearReporte(
             @RequestHeader("X-Empresa-Token") String token,
-            @Valid @RequestBody ReporteRequestDTO dto) {
+            @Valid @ModelAttribute ReporteRequestDTO dto) {
         ReporteResponseDTO reporte = reporteService.crearPublico(token, dto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Reporte registrado exitosamente", reporte));

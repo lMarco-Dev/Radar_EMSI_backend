@@ -4,6 +4,7 @@ import com.emsi.shared.enums.Turno;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,11 +36,6 @@ public class ReporteRequestDTO {
 
     private String lugarEspecifico;
     private String camposDinamicos;
-    private List<EvidenciaDTO> evidencias;
 
-    @Data
-    public static class EvidenciaDTO {
-        private String urlCloudinary;
-        private String publicIdCloudinary;
-    }
+    private List<MultipartFile> evidencias;
 }

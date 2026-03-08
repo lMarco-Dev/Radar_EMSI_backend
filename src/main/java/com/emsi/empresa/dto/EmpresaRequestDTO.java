@@ -3,6 +3,7 @@ package com.emsi.empresa.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class EmpresaRequestDTO {
@@ -13,5 +14,5 @@ public class EmpresaRequestDTO {
     @Size(max = 20)
     private String ruc;
 
-    private String logoUrl;
+    private MultipartFile logo;
 }

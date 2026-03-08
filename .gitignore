@@ -10,6 +10,7 @@ buildNumber.properties
 .mvn/wrapper/maven-wrapper.jar
 
 *.log
+.env
 
 .idea/
 *.iws
@@ -33,6 +34,5 @@ local.properties
 .DS_Store
 Thumbs.db
 
-.env
 *.env
 application-prod.properties

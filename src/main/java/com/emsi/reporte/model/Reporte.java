@@ -67,7 +67,7 @@ public class Reporte {
     @Column(name = "lugar_especifico", length = 300)
     private String lugarEspecifico;
 
-    @Column(name = "campos_dinamicos", columnDefinition = "JSON")
+    @Column(name = "campos_dinamicos", columnDefinition = "TEXT")
     private String camposDinamicos;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -81,4 +81,7 @@ public class Reporte {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(unique = true, updatable = false, length = 20)
+    private String folio;
 }
