@@ -1,12 +1,14 @@
 package com.emsi.reporte.service;
 
 import com.emsi.reporte.dto.CambioEstadoDTO;
+import com.emsi.reporte.dto.DashboardDTO;
 import com.emsi.reporte.dto.ReporteRequestDTO;
 import com.emsi.reporte.dto.ReporteResponseDTO;
 import com.emsi.shared.enums.EstadoReporte;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Map;
 
 public interface ReporteService {
@@ -15,4 +17,6 @@ public interface ReporteService {
     ReporteResponseDTO obtenerPorId(Long id);
     ReporteResponseDTO cambiarEstado(Long id, CambioEstadoDTO dto, String emailUsuario);
     Map<String, Long> obtenerEstadisticas();
+    DashboardDTO obtenerEstadisticasCompletas(String empresaNombre);
+    List<String> obtenerAreasPorEmpresa(Long empresaId);
 }

@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -51,5 +52,13 @@ public class ReportePublicoController {
         ReporteResponseDTO reporte = reporteService.crearPublico(token, dto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Reporte registrado exitosamente", reporte));
+    }
+
+    @GetMapping("/empresa/{token}/areas")
+    public ResponseEntity<ApiResponse<List<String>>> obtenerAreas(@PathVariable String token) {
+        var empresa = empresaRepository.findByTokenPublicoAndActivoTrue(token)
+                .orElseThrow(() -> new TokenInvalidoException("Token invalido"));
+
+        return ResponseEntity.ok(ApiResponse.ok(reporteService.obtenerAreasPorEmpresa(empresa.getId())));
     }
 }

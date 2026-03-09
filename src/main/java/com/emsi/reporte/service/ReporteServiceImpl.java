@@ -7,6 +7,7 @@ import com.emsi.catalogo.repository.TipoComportamientoRepository;
 import com.emsi.empresa.model.Empresa;
 import com.emsi.empresa.repository.EmpresaRepository;
 import com.emsi.reporte.dto.CambioEstadoDTO;
+import com.emsi.reporte.dto.DashboardDTO;
 import com.emsi.reporte.dto.ReporteRequestDTO;
 import com.emsi.reporte.dto.ReporteResponseDTO;
 import com.emsi.reporte.model.Evidencia;
@@ -81,7 +82,6 @@ public class ReporteServiceImpl implements ReporteService {
 
         Reporte saved = reporteRepository.save(reporte);
 
-        // Nuevo: Procesar múltiples imágenes hacia Cloudinary
         if (dto.getEvidencias() != null && !dto.getEvidencias().isEmpty()) {
             for (MultipartFile archivo : dto.getEvidencias()) {
                 if (!archivo.isEmpty()) {
@@ -106,6 +106,31 @@ public class ReporteServiceImpl implements ReporteService {
     public Page<ReporteResponseDTO> listar(Long empresaId, EstadoReporte estado, Long tipoId, Pageable pageable) {
         return reporteRepository.buscarConFiltros(empresaId, estado, tipoId, pageable)
                 .map(r -> toDTO(r, false));
+    }
+
+    @Override
+    public List<String> obtenerAreasPorEmpresa(Long empresaId) {
+        return reporteRepository.findDistinctAreasByEmpresaId(empresaId);
+    }
+
+    @Override
+    public DashboardDTO obtenerEstadisticasCompletas(String empresaNombre) {
+        // Determinamos si de verdad hay un filtro aplicado
+        boolean hayFiltro = empresaNombre != null && !empresaNombre.trim().isEmpty() && !"Todos".equalsIgnoreCase(empresaNombre);
+
+        Map<String, Long> contadores = new HashMap<>();
+        contadores.put("total", hayFiltro ? reporteRepository.countByEmpresa_Nombre(empresaNombre) : reporteRepository.count());
+        contadores.put("pendientes", hayFiltro ? reporteRepository.countByEstadoAndEmpresa_Nombre(EstadoReporte.PENDIENTE, empresaNombre) : reporteRepository.countByEstado(EstadoReporte.PENDIENTE));
+        contadores.put("enRevision", hayFiltro ? reporteRepository.countByEstadoAndEmpresa_Nombre(EstadoReporte.EN_REVISION, empresaNombre) : reporteRepository.countByEstado(EstadoReporte.EN_REVISION));
+        contadores.put("solucionados", hayFiltro ? reporteRepository.countByEstadoAndEmpresa_Nombre(EstadoReporte.SOLUCIONADO, empresaNombre) : reporteRepository.countByEstado(EstadoReporte.SOLUCIONADO));
+
+        return DashboardDTO.builder()
+                .contadores(contadores)
+                .porArea(hayFiltro ? reporteRepository.countByAreaFiltro(empresaNombre) : reporteRepository.countByArea())
+                .porEmpresa(reporteRepository.countByEmpresa()) // Nunca se filtra
+                .porTipo(hayFiltro ? reporteRepository.countByTipoFiltro(empresaNombre) : reporteRepository.countByTipo())
+                .tendencia(hayFiltro ? reporteRepository.getTendenciaMensualFiltro(empresaNombre) : reporteRepository.getTendenciaMensual())
+                .build();
     }
 
     @Override

@@ -34,16 +34,30 @@ public class UsuarioServiceImpl implements UsuarioService {
     public LoginResponseDTO login(LoginRequestDTO dto) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
+
         Usuario usuario = usuarioRepository.findByEmailAndActivoTrue(dto.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
         String token = jwtTokenProvider.generateToken(usuario.getEmail(), usuario.getRol().name());
+
         return LoginResponseDTO.builder()
                 .accessToken(token)
                 .tokenType("Bearer")
                 .rol(usuario.getRol().name())
                 .nombre(usuario.getNombre())
                 .email(usuario.getEmail())
+                // 👇 Agregamos esto para el Dashboard del Cliente
+                .empresaId(usuario.getEmpresa() != null ? usuario.getEmpresa().getId() : null)
+                .empresaNombre(usuario.getEmpresa() != null ? usuario.getEmpresa().getNombre() : null)
                 .build();
+    }
+
+    @Override
+    public List<UsuarioResponseDTO> listarPorEmpresa(Long empresaId) {
+        return usuarioRepository.findByEmpresaIdAndActivoTrue(empresaId)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override

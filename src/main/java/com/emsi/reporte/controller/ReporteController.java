@@ -1,6 +1,7 @@
 package com.emsi.reporte.controller;
 
 import com.emsi.reporte.dto.CambioEstadoDTO;
+import com.emsi.reporte.dto.DashboardDTO;
 import com.emsi.reporte.dto.ReporteResponseDTO;
 import com.emsi.reporte.service.ReporteService;
 import com.emsi.shared.enums.EstadoReporte;
@@ -50,7 +51,10 @@ public class ReporteController {
     }
 
     @GetMapping("/estadisticas")
-    public ResponseEntity<ApiResponse<Map<String, Long>>> estadisticas() {
-        return ResponseEntity.ok(ApiResponse.ok(reporteService.obtenerEstadisticas()));
+    public ResponseEntity<ApiResponse<DashboardDTO>> estadisticas(
+            @RequestParam(required = false) String empresa) {
+        return ResponseEntity.ok(ApiResponse.ok(reporteService.obtenerEstadisticasCompletas(empresa)));
     }
+
+
 }

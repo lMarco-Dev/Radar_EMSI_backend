@@ -40,4 +40,9 @@ public class UsuarioController {
         usuarioService.desactivar(id);
         return ResponseEntity.ok(ApiResponse.ok("Usuario desactivado", null));
     }
+
+    @GetMapping("/empresa/{empresaId}")
+    public ResponseEntity<ApiResponse<List<UsuarioResponseDTO>>> listarPorEmpresa(@PathVariable Long empresaId) {
+        return ResponseEntity.ok(ApiResponse.ok(usuarioService.listarPorEmpresa(empresaId)));
+    }
 }

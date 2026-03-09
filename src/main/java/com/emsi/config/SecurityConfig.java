@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/publico/**").permitAll()
+                        .requestMatchers("/error").permitAll() // <--- ESTO EVITA EL 403 FALSO
                         .requestMatchers(HttpMethod.GET, "/api/catalogos/**").authenticated()
                         .requestMatchers("/api/empresas/**").hasRole("ADMIN")
                         .requestMatchers("/api/usuarios/**").hasRole("ADMIN")

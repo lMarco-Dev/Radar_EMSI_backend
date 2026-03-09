@@ -13,4 +13,5 @@ public interface UsuarioService {
     List<UsuarioResponseDTO> listarTodos();
     UsuarioResponseDTO obtenerPorId(Long id);
     void desactivar(Long id);
+    List<UsuarioResponseDTO> listarPorEmpresa(Long empresaId);
 }
