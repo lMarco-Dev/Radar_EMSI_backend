@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Data
 public class EmpresaRequestDTO {
     @NotBlank(message = "El nombre es obligatorio")
@@ -15,4 +17,6 @@ public class EmpresaRequestDTO {
     private String ruc;
 
     private MultipartFile logo;
+
+    private List<String> departamentos;
 }

@@ -5,6 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -40,6 +42,17 @@ public class Empresa {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    // Relación con departamentos
+    @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Departamento> departamentos = new ArrayList<>();
+
+    //Método de ayuda para enlazar los departamentos
+    public void addDepartamento(Departamento departamento){
+        departamentos.add(departamento);
+        departamento.setEmpresa(this);
+    }
 
     @PrePersist
     public void prePersist() {

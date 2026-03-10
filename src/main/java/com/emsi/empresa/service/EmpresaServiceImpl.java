@@ -3,6 +3,7 @@ package com.emsi.empresa.service;
 import com.emsi.empresa.dto.EmpresaRequestDTO;
 import com.emsi.empresa.dto.EmpresaResponseDTO;
 import com.emsi.empresa.dto.QrInfoDTO;
+import com.emsi.empresa.model.Departamento;
 import com.emsi.empresa.model.Empresa;
 import com.emsi.empresa.repository.EmpresaRepository;
 import com.emsi.shared.exception.ResourceNotFoundException;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.emsi.shared.service.CloudinaryService;
@@ -44,11 +46,26 @@ public class EmpresaServiceImpl implements EmpresaService {
             }
         }
 
+        //1. Construimos la empresa
         Empresa empresa = Empresa.builder()
                 .nombre(dto.getNombre())
                 .ruc(dto.getRuc())
                 .logoUrl(logoUrl)
+                .departamentos((new ArrayList<>()))
                 .build();
+
+        //2. Si el front envió departametno lo agregamos
+        if (dto.getDepartamentos() != null && !dto.getDepartamentos().isEmpty()){
+            for(String nombreDepto: dto.getDepartamentos()) {
+                if(nombreDepto != null && !nombreDepto.trim().isEmpty()){
+                    Departamento nuevoDepto = Departamento.builder()
+                            .nombre(nombreDepto.trim())
+                            .build();
+                    empresa.addDepartamento(nuevoDepto);
+                }
+            }
+        }
+
         return toDTO(empresaRepository.save(empresa));
     }
 
@@ -126,6 +143,11 @@ public class EmpresaServiceImpl implements EmpresaService {
                 .tokenPublico(empresa.getTokenPublico())
                 .activo(empresa.getActivo())
                 .createdAt(empresa.getCreatedAt())
+                .departamentos(
+                        empresa.getDepartamentos() != null
+                        ? empresa.getDepartamentos().stream().map(Departamento::getNombre).collect(Collectors.toList())
+                                : new ArrayList<>()
+                )
                 .build();
     }
 }
