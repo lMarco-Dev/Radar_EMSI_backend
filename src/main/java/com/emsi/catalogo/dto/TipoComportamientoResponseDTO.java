@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class TipoComportamientoDTO {
+public class TipoComportamientoResponseDTO {
     private Long id;
     private String nombre;
     private String descripcion;

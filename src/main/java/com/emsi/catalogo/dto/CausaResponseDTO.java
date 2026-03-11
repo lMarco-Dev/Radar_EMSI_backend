@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class CausaDTO {
+public class CausaResponseDTO {
     private Long id;
     private String nombre;
     private Boolean activo;
