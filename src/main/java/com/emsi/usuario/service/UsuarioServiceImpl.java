@@ -46,9 +46,9 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .rol(usuario.getRol().name())
                 .nombre(usuario.getNombre())
                 .email(usuario.getEmail())
-                // 👇 Agregamos esto para el Dashboard del Cliente
                 .empresaId(usuario.getEmpresa() != null ? usuario.getEmpresa().getId() : null)
                 .empresaNombre(usuario.getEmpresa() != null ? usuario.getEmpresa().getNombre() : null)
+                    .empresaToken(usuario.getEmpresa() != null ? usuario.getEmpresa().getTokenPublico() : null)
                 .build();
     }
 

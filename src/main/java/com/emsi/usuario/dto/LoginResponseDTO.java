@@ -13,4 +13,5 @@ public class LoginResponseDTO {
     private String email;
     private String empresaNombre;
     private Long empresaId;
+    private String empresaToken;
 }
