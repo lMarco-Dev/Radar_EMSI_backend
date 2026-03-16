@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.emsi.shared.service.CloudinaryService;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -70,13 +71,13 @@ public class ReporteServiceImpl implements ReporteService {
                 .folio(folioUnico)
                 .tipoComportamiento(tipo)
                 .causa(causa)
-                .nombreReportante(dto.getNombreReportante())
-                .area(dto.getArea())
+                .nombreReportante(dto.getNombreReportante() != null ? HtmlUtils.htmlEscape(dto.getNombreReportante()) : null)
+                .area(dto.getArea() != null ? HtmlUtils.htmlEscape(dto.getArea()) : null)
                 .turno(dto.getTurno())
-                .descripcionComportamiento(dto.getDescripcionComportamiento())
-                .medidaContencion(dto.getMedidaContencion())
+                .descripcionComportamiento(HtmlUtils.htmlEscape(dto.getDescripcionComportamiento()))
+                .medidaContencion(dto.getMedidaContencion() != null ? HtmlUtils.htmlEscape(dto.getMedidaContencion()) : null)
                 .fechaOcurrido(dto.getFechaOcurrido())
-                .lugarEspecifico(dto.getLugarEspecifico())
+                .lugarEspecifico(dto.getLugarEspecifico() != null ? HtmlUtils.htmlEscape(dto.getLugarEspecifico()) : null)
                 .camposDinamicos(dto.getCamposDinamicos())
                 .build();
 
@@ -115,7 +116,6 @@ public class ReporteServiceImpl implements ReporteService {
 
     @Override
     public DashboardDTO obtenerEstadisticasCompletas(String empresaNombre) {
-        // Determinamos si de verdad hay un filtro aplicado
         boolean hayFiltro = empresaNombre != null && !empresaNombre.trim().isEmpty() && !"Todos".equalsIgnoreCase(empresaNombre);
 
         Map<String, Long> contadores = new HashMap<>();
@@ -148,10 +148,17 @@ public class ReporteServiceImpl implements ReporteService {
         reporte.setEstado(dto.getEstado());
         reporte.setRevisadoPor(usuario);
         reporteRepository.save(reporte);
+
+        String comentarioSeguro = dto.getComentario() != null ? HtmlUtils.htmlEscape(dto.getComentario()) : null;
+
         historialEstadoRepository.save(HistorialEstado.builder()
-                .reporte(reporte).cambiadoPor(usuario)
-                .estadoAnterior(estadoAnterior).estadoNuevo(dto.getEstado())
-                .comentario(dto.getComentario()).build());
+                .reporte(reporte)
+                .cambiadoPor(usuario)
+                .estadoAnterior(estadoAnterior)
+                .estadoNuevo(dto.getEstado())
+                .comentario(comentarioSeguro)
+                .build());
+
         return toDTO(reporte, true);
     }
 
@@ -168,6 +175,20 @@ public class ReporteServiceImpl implements ReporteService {
     private Reporte findById(Long id) {
         return reporteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reporte no encontrado con id: " + id));
+    }
+
+    @Override
+    public ReporteResponseDTO rastrearPorFolio(String folio) {
+        Reporte reporte = reporteRepository.findByFolio(folio)
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró ningún reporte con el folio: " + folio));
+
+        ReporteResponseDTO dto = toDTO(reporte, true);
+
+        dto.setNombreReportante(null);
+        dto.setEvidencias(null);
+        dto.setCamposDinamicos(null);
+
+        return dto;
     }
 
     private ReporteResponseDTO toDTO(Reporte r, boolean incluirDetalles) {

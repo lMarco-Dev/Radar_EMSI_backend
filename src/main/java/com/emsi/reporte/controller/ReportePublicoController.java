@@ -61,4 +61,9 @@ public class ReportePublicoController {
 
         return ResponseEntity.ok(ApiResponse.ok(reporteService.obtenerAreasPorEmpresa(empresa.getId())));
     }
+
+    @GetMapping("/reportes/rastrear/{folio}")
+    public ResponseEntity<ApiResponse<ReporteResponseDTO>> rastrearReporte(@PathVariable String folio) {
+        return ResponseEntity.ok(ApiResponse.ok(reporteService.rastrearPorFolio(folio)));
+    }
 }

@@ -45,4 +45,18 @@ public class UsuarioController {
     public ResponseEntity<ApiResponse<List<UsuarioResponseDTO>>> listarPorEmpresa(@PathVariable Long empresaId) {
         return ResponseEntity.ok(ApiResponse.ok(usuarioService.listarPorEmpresa(empresaId)));
     }
+
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<ApiResponse<Void>> cambiarEstado(@PathVariable Long id) {
+        usuarioService.cambiarEstado(id);
+        return ResponseEntity.ok(ApiResponse.ok("Estado de usuario actualizado", null));
+    }
+
+    @PatchMapping("/{id}/password")
+    public ResponseEntity<ApiResponse<Void>> cambiarPassword(
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, String> body) {
+        usuarioService.cambiarPassword(id, body.get("password"));
+        return ResponseEntity.ok(ApiResponse.ok("Contraseña actualizada exitosamente", null));
+    }
 }

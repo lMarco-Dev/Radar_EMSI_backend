@@ -31,6 +31,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional(readOnly = true)
     public LoginResponseDTO login(LoginRequestDTO dto) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
@@ -48,16 +49,33 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .email(usuario.getEmail())
                 .empresaId(usuario.getEmpresa() != null ? usuario.getEmpresa().getId() : null)
                 .empresaNombre(usuario.getEmpresa() != null ? usuario.getEmpresa().getNombre() : null)
-                    .empresaToken(usuario.getEmpresa() != null ? usuario.getEmpresa().getTokenPublico() : null)
+                .empresaToken(usuario.getEmpresa() != null ? usuario.getEmpresa().getTokenPublico() : null)
                 .build();
     }
 
     @Override
     public List<UsuarioResponseDTO> listarPorEmpresa(Long empresaId) {
-        return usuarioRepository.findByEmpresaIdAndActivoTrue(empresaId)
+        // OJO: Usamos findByEmpresaId (sin el AndActivoTrue) para ver todos.
+        return usuarioRepository.findByEmpresaId(empresaId)
                 .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void cambiarEstado(Long id) {
+        Usuario usuario = findById(id);
+        usuario.setActivo(!usuario.getActivo()); // Alterna entre true y false
+        usuarioRepository.save(usuario);
+    }
+
+    @Override
+    @Transactional
+    public void cambiarPassword(Long id, String nuevaPassword) {
+        Usuario usuario = findById(id);
+        usuario.setPasswordHash(passwordEncoder.encode(nuevaPassword));
+        usuarioRepository.save(usuario);
     }
 
     @Override

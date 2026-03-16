@@ -1,10 +1,7 @@
 package com.emsi.usuario.dto;
 
 import com.emsi.shared.enums.RolUsuario;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
@@ -16,8 +13,7 @@ public class UsuarioRequestDTO {
     @Email
     private String email;
 
-    @NotBlank
-    @Size(min = 6)
+    @Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d).{8,}$", message = "La clave debe tener 8 caracteres, un número y una mayúscula")
     private String password;
 
     @NotNull
