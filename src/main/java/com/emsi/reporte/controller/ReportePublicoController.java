@@ -59,7 +59,11 @@ public class ReportePublicoController {
         var empresa = empresaRepository.findByTokenPublicoAndActivoTrue(token)
                 .orElseThrow(() -> new TokenInvalidoException("Token invalido"));
 
-        return ResponseEntity.ok(ApiResponse.ok(reporteService.obtenerAreasPorEmpresa(empresa.getId())));
+        List<String> areas = empresa.getDepartamentos().stream()
+                .map(dep -> dep.getNombre())
+                .collect(java.util.stream.Collectors.toList());
+
+        return ResponseEntity.ok(ApiResponse.ok(areas));
     }
 
     @GetMapping("/reportes/rastrear/{folio}")
