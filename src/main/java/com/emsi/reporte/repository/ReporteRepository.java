@@ -41,7 +41,11 @@ public interface ReporteRepository extends JpaRepository<Reporte, Long> {
     @Query("SELECT r.tipoComportamiento.nombre as name, COUNT(r) as value FROM Reporte r GROUP BY r.tipoComportamiento.nombre")
     List<Map<String, Object>> countByTipo();
 
-    @Query("SELECT FUNCTION('MONTHNAME', r.createdAt) as mes, COUNT(r) as incidentes FROM Reporte r GROUP BY FUNCTION('MONTH', r.createdAt), FUNCTION('MONTHNAME', r.createdAt) ORDER BY FUNCTION('MONTH', r.createdAt) ASC")
+    // AQUÍ ESTÁ EL CAMBIO 1: Agregamos r.estado y cambiamos el alias a 'cantidad'
+    @Query("SELECT FUNCTION('MONTHNAME', r.createdAt) as mes, r.estado as estado, COUNT(r) as cantidad " +
+            "FROM Reporte r " +
+            "GROUP BY FUNCTION('MONTH', r.createdAt), FUNCTION('MONTHNAME', r.createdAt), r.estado " +
+            "ORDER BY FUNCTION('MONTH', r.createdAt) ASC")
     List<Map<String, Object>> getTendenciaMensual();
 
     // ==========================================
@@ -57,7 +61,12 @@ public interface ReporteRepository extends JpaRepository<Reporte, Long> {
     @Query("SELECT r.tipoComportamiento.nombre as name, COUNT(r) as value FROM Reporte r WHERE r.empresa.nombre = :empresaNombre GROUP BY r.tipoComportamiento.nombre")
     List<Map<String, Object>> countByTipoFiltro(@Param("empresaNombre") String empresaNombre);
 
-    @Query("SELECT FUNCTION('MONTHNAME', r.createdAt) as mes, COUNT(r) as incidentes FROM Reporte r WHERE r.empresa.nombre = :empresaNombre GROUP BY FUNCTION('MONTH', r.createdAt), FUNCTION('MONTHNAME', r.createdAt) ORDER BY FUNCTION('MONTH', r.createdAt) ASC")
+    // AQUÍ ESTÁ EL CAMBIO 2: Lo mismo, pero para el filtro por empresa
+    @Query("SELECT FUNCTION('MONTHNAME', r.createdAt) as mes, r.estado as estado, COUNT(r) as cantidad " +
+            "FROM Reporte r " +
+            "WHERE r.empresa.nombre = :empresaNombre " +
+            "GROUP BY FUNCTION('MONTH', r.createdAt), FUNCTION('MONTHNAME', r.createdAt), r.estado " +
+            "ORDER BY FUNCTION('MONTH', r.createdAt) ASC")
     List<Map<String, Object>> getTendenciaMensualFiltro(@Param("empresaNombre") String empresaNombre);
 
     Optional<Reporte> findByFolio(String folio);
