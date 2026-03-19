@@ -17,7 +17,7 @@ public interface ReporteService {
     ReporteResponseDTO obtenerPorId(Long id);
     ReporteResponseDTO cambiarEstado(Long id, CambioEstadoDTO dto, String emailUsuario);
     Map<String, Long> obtenerEstadisticas();
-    DashboardDTO obtenerEstadisticasCompletas(String empresaNombre);
     List<String> obtenerAreasPorEmpresa(Long empresaId);
     ReporteResponseDTO rastrearPorFolio(String folio);
+    DashboardDTO obtenerEstadisticasCompletas(String empresaNombre, String mesYYYYMM);
 }

@@ -24,50 +24,49 @@ public interface ReporteRepository extends JpaRepository<Reporte, Long> {
             @Param("tipoId") Long tipoId,
             Pageable pageable);
 
-    long countByEstado(EstadoReporte estado);
-
     @Query("SELECT DISTINCT r.area FROM Reporte r WHERE r.empresa.id = :empresaId AND r.area IS NOT NULL")
     List<String> findDistinctAreasByEmpresaId(@Param("empresaId") Long empresaId);
 
-    // ==========================================
-    // GLOBALES (Para cuando se selecciona "Todos")
-    // ==========================================
-    @Query("SELECT r.area as name, COUNT(r) as cantidad FROM Reporte r GROUP BY r.area ORDER BY COUNT(r) DESC")
-    List<Map<String, Object>> countByArea();
-
-    @Query("SELECT r.empresa.nombre as name, COUNT(r) as cantidad FROM Reporte r GROUP BY r.empresa.nombre ORDER BY COUNT(r) DESC")
-    List<Map<String, Object>> countByEmpresa();
-
-    @Query("SELECT r.tipoComportamiento.nombre as name, COUNT(r) as value FROM Reporte r GROUP BY r.tipoComportamiento.nombre")
-    List<Map<String, Object>> countByTipo();
-
-    // AQUÍ ESTÁ EL CAMBIO 1: Agregamos r.estado y cambiamos el alias a 'cantidad'
-    @Query("SELECT FUNCTION('MONTHNAME', r.createdAt) as mes, r.estado as estado, COUNT(r) as cantidad " +
-            "FROM Reporte r " +
-            "GROUP BY FUNCTION('MONTH', r.createdAt), FUNCTION('MONTHNAME', r.createdAt), r.estado " +
-            "ORDER BY FUNCTION('MONTH', r.createdAt) ASC")
-    List<Map<String, Object>> getTendenciaMensual();
-
-    // ==========================================
-    // ESPECÍFICAS (Para cuando se filtra por Empresa)
-    // ==========================================
-    long countByEmpresa_Nombre(String empresaNombre);
-
-    long countByEstadoAndEmpresa_Nombre(EstadoReporte estado, String empresaNombre);
-
-    @Query("SELECT r.area as name, COUNT(r) as cantidad FROM Reporte r WHERE r.empresa.nombre = :empresaNombre GROUP BY r.area ORDER BY COUNT(r) DESC")
-    List<Map<String, Object>> countByAreaFiltro(@Param("empresaNombre") String empresaNombre);
-
-    @Query("SELECT r.tipoComportamiento.nombre as name, COUNT(r) as value FROM Reporte r WHERE r.empresa.nombre = :empresaNombre GROUP BY r.tipoComportamiento.nombre")
-    List<Map<String, Object>> countByTipoFiltro(@Param("empresaNombre") String empresaNombre);
-
-    // AQUÍ ESTÁ EL CAMBIO 2: Lo mismo, pero para el filtro por empresa
-    @Query("SELECT FUNCTION('MONTHNAME', r.createdAt) as mes, r.estado as estado, COUNT(r) as cantidad " +
-            "FROM Reporte r " +
-            "WHERE r.empresa.nombre = :empresaNombre " +
-            "GROUP BY FUNCTION('MONTH', r.createdAt), FUNCTION('MONTHNAME', r.createdAt), r.estado " +
-            "ORDER BY FUNCTION('MONTH', r.createdAt) ASC")
-    List<Map<String, Object>> getTendenciaMensualFiltro(@Param("empresaNombre") String empresaNombre);
-
     Optional<Reporte> findByFolio(String folio);
+    long countByEstado(EstadoReporte estado);
+    @Query("SELECT MIN(r.createdAt) FROM Reporte r")
+    Optional<java.time.LocalDateTime> obtenerFechaPrimerReporte();
+    @Query("SELECT COUNT(r) FROM Reporte r WHERE " +
+            "(:empresa IS NULL OR r.empresa.nombre = :empresa) AND " +
+            "(:anio IS NULL OR YEAR(r.createdAt) = :anio) AND " +
+            "(:mes IS NULL OR MONTH(r.createdAt) = :mes)")
+    long countDashboardTotal(@Param("empresa") String empresa, @Param("anio") Integer anio, @Param("mes") Integer mes);
+
+    @Query("SELECT COUNT(r) FROM Reporte r WHERE r.estado = :estado AND " +
+            "(:empresa IS NULL OR r.empresa.nombre = :empresa) AND " +
+            "(:anio IS NULL OR YEAR(r.createdAt) = :anio) AND " +
+            "(:mes IS NULL OR MONTH(r.createdAt) = :mes)")
+    long countDashboardByEstado(@Param("estado") EstadoReporte estado, @Param("empresa") String empresa, @Param("anio") Integer anio, @Param("mes") Integer mes);
+
+    @Query("SELECT r.area as name, COUNT(r) as cantidad FROM Reporte r WHERE " +
+            "(:empresa IS NULL OR r.empresa.nombre = :empresa) AND " +
+            "(:anio IS NULL OR YEAR(r.createdAt) = :anio) AND " +
+            "(:mes IS NULL OR MONTH(r.createdAt) = :mes) " +
+            "GROUP BY r.area ORDER BY COUNT(r) DESC")
+    List<Map<String, Object>> countDashboardByArea(@Param("empresa") String empresa, @Param("anio") Integer anio, @Param("mes") Integer mes);
+
+    @Query("SELECT r.tipoComportamiento.nombre as name, COUNT(r) as value FROM Reporte r WHERE " +
+            "(:empresa IS NULL OR r.empresa.nombre = :empresa) AND " +
+            "(:anio IS NULL OR YEAR(r.createdAt) = :anio) AND " +
+            "(:mes IS NULL OR MONTH(r.createdAt) = :mes) " +
+            "GROUP BY r.tipoComportamiento.nombre")
+    List<Map<String, Object>> countDashboardByTipo(@Param("empresa") String empresa, @Param("anio") Integer anio, @Param("mes") Integer mes);
+
+    @Query("SELECT r.empresa.nombre as name, COUNT(r) as cantidad FROM Reporte r WHERE " +
+            "(:anio IS NULL OR YEAR(r.createdAt) = :anio) AND " +
+            "(:mes IS NULL OR MONTH(r.createdAt) = :mes) " +
+            "GROUP BY r.empresa.nombre ORDER BY COUNT(r) DESC")
+    List<Map<String, Object>> countDashboardByEmpresas(@Param("anio") Integer anio, @Param("mes") Integer mes);
+
+    @Query("SELECT FUNCTION('MONTHNAME', r.createdAt) as mes, r.estado as estado, COUNT(r) as cantidad " +
+            "FROM Reporte r " +
+            "WHERE (:empresa IS NULL OR r.empresa.nombre = :empresa) " +
+            "GROUP BY FUNCTION('MONTH', r.createdAt), FUNCTION('MONTHNAME', r.createdAt), r.estado " +
+            "ORDER BY FUNCTION('MONTH', r.createdAt) ASC")
+    List<Map<String, Object>> getTendenciaDashboard(@Param("empresa") String empresa);
 }

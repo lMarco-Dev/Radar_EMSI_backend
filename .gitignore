@@ -34,5 +34,5 @@ local.properties
 .DS_Store
 Thumbs.db
 
-*.env
-application-prod.properties
+.env
+application.properties

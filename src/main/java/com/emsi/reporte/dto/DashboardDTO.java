@@ -13,4 +13,5 @@ public class DashboardDTO {
     private List<Map<String, Object>> porEmpresa;
     private List<Map<String, Object>> porTipo;
     private List<Map<String, Object>> tendencia;
+    private String mesInicioSistema;
 }

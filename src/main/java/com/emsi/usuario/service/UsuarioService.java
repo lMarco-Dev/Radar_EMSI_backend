@@ -16,4 +16,5 @@ public interface UsuarioService {
     List<UsuarioResponseDTO> listarPorEmpresa(Long empresaId);
     void cambiarEstado(Long id);
     void cambiarPassword(Long id, String nuevaPassword);
+    UsuarioResponseDTO actualizar(Long id, UsuarioRequestDTO dto);
 }

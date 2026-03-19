@@ -62,9 +62,10 @@ public class ReporteController {
     }
 
     @GetMapping("/estadisticas")
-    public ResponseEntity<ApiResponse<DashboardDTO>> estadisticas(
-            @RequestParam(required = false) String empresa) {
-        return ResponseEntity.ok(ApiResponse.ok(reporteService.obtenerEstadisticasCompletas(empresa)));
+    public ResponseEntity<ApiResponse<DashboardDTO>> obtenerEstadisticas(
+            @RequestParam(required = false) String empresa,
+            @RequestParam(required = false) String mes) {
+        return ResponseEntity.ok(ApiResponse.ok(reporteService.obtenerEstadisticasCompletas(empresa, mes)));
     }
 
     @GetMapping("/exportar/excel")

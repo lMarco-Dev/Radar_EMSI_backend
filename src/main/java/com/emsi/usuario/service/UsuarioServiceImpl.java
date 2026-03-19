@@ -55,11 +55,29 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public List<UsuarioResponseDTO> listarPorEmpresa(Long empresaId) {
-        // OJO: Usamos findByEmpresaId (sin el AndActivoTrue) para ver todos.
         return usuarioRepository.findByEmpresaId(empresaId)
                 .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public UsuarioResponseDTO actualizar(Long id, UsuarioRequestDTO dto) {
+        Usuario usuario = findById(id);
+
+        if (!usuario.getEmail().equals(dto.getEmail()) && usuarioRepository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("El email ya esta registrado por otro usuario");
+        }
+
+        usuario.setNombre(dto.getNombre());
+        usuario.setEmail(dto.getEmail());
+
+        if (dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
+            usuario.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        }
+
+        return toDTO(usuarioRepository.save(usuario));
     }
 
     @Override

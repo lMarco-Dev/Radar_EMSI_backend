@@ -59,4 +59,11 @@ public class UsuarioController {
         usuarioService.cambiarPassword(id, body.get("password"));
         return ResponseEntity.ok(ApiResponse.ok("Contraseña actualizada exitosamente", null));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<UsuarioResponseDTO>> actualizar(
+            @PathVariable Long id,
+            @RequestBody UsuarioRequestDTO dto) {
+        return ResponseEntity.ok(ApiResponse.ok("Usuario actualizado", usuarioService.actualizar(id, dto)));
+    }
 }

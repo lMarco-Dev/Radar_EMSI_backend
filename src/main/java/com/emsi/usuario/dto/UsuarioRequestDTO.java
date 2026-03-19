@@ -13,7 +13,7 @@ public class UsuarioRequestDTO {
     @Email
     private String email;
 
-    @Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d).{8,}$", message = "La clave debe tener 8 caracteres, un número y una mayúscula")
+    @Pattern(regexp = "^$|^(?=.*[A-Z])(?=.*\\d).{8,}$", message = "La clave debe tener 8 caracteres, un número y una mayúscula")
     private String password;
 
     @NotNull

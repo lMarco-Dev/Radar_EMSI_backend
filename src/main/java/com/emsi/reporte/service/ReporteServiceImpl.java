@@ -28,7 +28,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.emsi.shared.service.CloudinaryService;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.util.HtmlUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 
 import java.util.HashMap;
 import java.util.List;
@@ -71,13 +72,13 @@ public class ReporteServiceImpl implements ReporteService {
                 .folio(folioUnico)
                 .tipoComportamiento(tipo)
                 .causa(causa)
-                .nombreReportante(dto.getNombreReportante() != null ? HtmlUtils.htmlEscape(dto.getNombreReportante()) : null)
-                .area(dto.getArea() != null ? HtmlUtils.htmlEscape(dto.getArea()) : null)
+                .nombreReportante(dto.getNombreReportante() != null ? Jsoup.clean(dto.getNombreReportante(), Safelist.none()) : null)
+                .area(dto.getArea() != null ? Jsoup.clean(dto.getArea(), Safelist.none()) : null)
                 .turno(dto.getTurno())
-                .descripcionComportamiento(HtmlUtils.htmlEscape(dto.getDescripcionComportamiento()))
-                .medidaContencion(dto.getMedidaContencion() != null ? HtmlUtils.htmlEscape(dto.getMedidaContencion()) : null)
+                .descripcionComportamiento(Jsoup.clean(dto.getDescripcionComportamiento(), Safelist.none()))
+                .medidaContencion(dto.getMedidaContencion() != null ? Jsoup.clean(dto.getMedidaContencion(), Safelist.none()) : null)
                 .fechaOcurrido(dto.getFechaOcurrido())
-                .lugarEspecifico(dto.getLugarEspecifico() != null ? HtmlUtils.htmlEscape(dto.getLugarEspecifico()) : null)
+                .lugarEspecifico(dto.getLugarEspecifico() != null ? Jsoup.clean(dto.getLugarEspecifico(), Safelist.none()) : null)
                 .camposDinamicos(dto.getCamposDinamicos())
                 .build();
 
@@ -115,21 +116,35 @@ public class ReporteServiceImpl implements ReporteService {
     }
 
     @Override
-    public DashboardDTO obtenerEstadisticasCompletas(String empresaNombre) {
-        boolean hayFiltro = empresaNombre != null && !empresaNombre.trim().isEmpty() && !"Todos".equalsIgnoreCase(empresaNombre);
+    public DashboardDTO obtenerEstadisticasCompletas(String empresaNombre, String mesYYYYMM) {
+        String empresaFiltro = (empresaNombre != null && !empresaNombre.trim().isEmpty() && !"Todos".equalsIgnoreCase(empresaNombre)) ? empresaNombre : null;
+
+        Integer anio = null;
+        Integer mes = null;
+
+        if (mesYYYYMM != null && mesYYYYMM.matches("\\d{4}-\\d{2}")) {
+            String[] parts = mesYYYYMM.split("-");
+            anio = Integer.parseInt(parts[0]);
+            mes = Integer.parseInt(parts[1]);
+        }
 
         Map<String, Long> contadores = new HashMap<>();
-        contadores.put("total", hayFiltro ? reporteRepository.countByEmpresa_Nombre(empresaNombre) : reporteRepository.count());
-        contadores.put("pendientes", hayFiltro ? reporteRepository.countByEstadoAndEmpresa_Nombre(EstadoReporte.PENDIENTE, empresaNombre) : reporteRepository.countByEstado(EstadoReporte.PENDIENTE));
-        contadores.put("enRevision", hayFiltro ? reporteRepository.countByEstadoAndEmpresa_Nombre(EstadoReporte.EN_REVISION, empresaNombre) : reporteRepository.countByEstado(EstadoReporte.EN_REVISION));
-        contadores.put("solucionados", hayFiltro ? reporteRepository.countByEstadoAndEmpresa_Nombre(EstadoReporte.SOLUCIONADO, empresaNombre) : reporteRepository.countByEstado(EstadoReporte.SOLUCIONADO));
+        contadores.put("total", reporteRepository.countDashboardTotal(empresaFiltro, anio, mes));
+        contadores.put("pendientes", reporteRepository.countDashboardByEstado(EstadoReporte.PENDIENTE, empresaFiltro, anio, mes));
+        contadores.put("enRevision", reporteRepository.countDashboardByEstado(EstadoReporte.EN_REVISION, empresaFiltro, anio, mes));
+        contadores.put("solucionados", reporteRepository.countDashboardByEstado(EstadoReporte.SOLUCIONADO, empresaFiltro, anio, mes));
+
+        String mesInicio = reporteRepository.obtenerFechaPrimerReporte()
+                .map(date -> String.format("%04d-%02d", date.getYear(), date.getMonthValue()))
+                .orElse(java.time.YearMonth.now().toString());
 
         return DashboardDTO.builder()
                 .contadores(contadores)
-                .porArea(hayFiltro ? reporteRepository.countByAreaFiltro(empresaNombre) : reporteRepository.countByArea())
-                .porEmpresa(reporteRepository.countByEmpresa()) // Nunca se filtra
-                .porTipo(hayFiltro ? reporteRepository.countByTipoFiltro(empresaNombre) : reporteRepository.countByTipo())
-                .tendencia(hayFiltro ? reporteRepository.getTendenciaMensualFiltro(empresaNombre) : reporteRepository.getTendenciaMensual())
+                .porArea(reporteRepository.countDashboardByArea(empresaFiltro, anio, mes))
+                .porEmpresa(reporteRepository.countDashboardByEmpresas(anio, mes))
+                .porTipo(reporteRepository.countDashboardByTipo(empresaFiltro, anio, mes))
+                .tendencia(reporteRepository.getTendenciaDashboard(empresaFiltro))
+                .mesInicioSistema(mesInicio)
                 .build();
     }
 
@@ -149,7 +164,7 @@ public class ReporteServiceImpl implements ReporteService {
         reporte.setRevisadoPor(usuario);
         reporteRepository.save(reporte);
 
-        String comentarioSeguro = dto.getComentario() != null ? HtmlUtils.htmlEscape(dto.getComentario()) : null;
+        String comentarioSeguro = dto.getComentario() != null ? Jsoup.clean(dto.getComentario(), Safelist.none()) : null;
 
         historialEstadoRepository.save(HistorialEstado.builder()
                 .reporte(reporte)
