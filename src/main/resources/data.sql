@@ -1,3 +1,4 @@
+-- Catalogo de Comportamientos
 INSERT IGNORE INTO tipo_comportamiento (nombre, descripcion, activo) VALUES
 ('Comportamiento Inseguro', 'Accion o comportamiento que puede causar un accidente', true),
 ('Reconocimiento', 'Reconocimiento de buena practica de seguridad', true),
@@ -6,6 +7,7 @@ INSERT IGNORE INTO tipo_comportamiento (nombre, descripcion, activo) VALUES
 ('Condicion Insegura', 'Condicion del entorno que representa un peligro', true),
 ('Acto Inseguro', 'Acto que viola un procedimiento o norma de seguridad', true);
 
+-- Catalogo de Causas Raiz
 INSERT IGNORE INTO causa (nombre, activo) VALUES
 ('Error Humano', true),
 ('Falta de Recursos Adecuados', true),
@@ -13,6 +15,3 @@ INSERT IGNORE INTO causa (nombre, activo) VALUES
 ('Falta de Capacitacion', true),
 ('Condicion Ambiental', true),
 ('Falla de Equipos', true);
-
-INSERT IGNORE INTO usuario (nombre, email, password_hash, rol, activo)
-VALUES ('Administrador EMSI', 'admiso@emsi.com', '$2a$12$297a.mNSklk4S4FaEDTYDOYkL0G22AIzfg2OSd/4/Rvg3cWfwS.EG', 'ADMIN', true);
