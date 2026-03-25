@@ -68,7 +68,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of(frontendUrl));
+        configuration.setAllowedOriginPatterns(List.of(
+                frontendUrl,
+                "https://radar-*.vercel.app",
+                "http://localhost:5173"
+        ));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
