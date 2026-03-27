@@ -70,7 +70,7 @@ public class SecurityConfig {
 
         configuration.setAllowedOriginPatterns(List.of(
                 frontendUrl,
-                "https://radar-*.vercel.app",
+                "https://emsiradar.vercel.app",
                 "http://localhost:5173"
         ));
 
