@@ -154,6 +154,27 @@ public class ReporteServiceImpl implements ReporteService {
     }
 
     @Override
+    public ReporteResponseDTO rastrearPorFolioYToken(String folio, String token) {
+        Empresa empresa = empresaRepository.findByTokenPublicoAndActivoTrue(token)
+                .orElseThrow(() -> new TokenInvalidoException("Token inválido o empresa inactiva"));
+
+        Reporte reporte = reporteRepository.findByFolio(folio)
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró ningún reporte con este folio."));
+
+        if (!reporte.getEmpresa().getId().equals(empresa.getId())) {
+            throw new ResourceNotFoundException("No se encontró ningún reporte con este folio.");
+        }
+
+        ReporteResponseDTO dto = toDTO(reporte, true);
+
+        dto.setNombreReportante(null);
+        dto.setEvidencias(null);
+        dto.setCamposDinamicos(null);
+
+        return dto;
+    }
+
+    @Override
     @Transactional
     public ReporteResponseDTO cambiarEstado(Long id, CambioEstadoDTO dto, String emailUsuario) {
         Reporte reporte = findById(id);

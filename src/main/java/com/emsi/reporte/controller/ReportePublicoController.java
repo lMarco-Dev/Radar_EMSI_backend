@@ -67,7 +67,10 @@ public class ReportePublicoController {
     }
 
     @GetMapping("/reportes/rastrear/{folio}")
-    public ResponseEntity<ApiResponse<ReporteResponseDTO>> rastrearReporte(@PathVariable String folio) {
-        return ResponseEntity.ok(ApiResponse.ok(reporteService.rastrearPorFolio(folio)));
+    public ResponseEntity<ApiResponse<ReporteResponseDTO>> rastrearReporte(
+            @PathVariable String folio,
+            @RequestHeader("X-Empresa-Token") String token) {
+
+        return ResponseEntity.ok(ApiResponse.ok(reporteService.rastrearPorFolioYToken(folio, token)));
     }
 }

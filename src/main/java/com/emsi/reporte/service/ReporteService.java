@@ -20,4 +20,5 @@ public interface ReporteService {
     List<String> obtenerAreasPorEmpresa(Long empresaId);
     ReporteResponseDTO rastrearPorFolio(String folio);
     DashboardDTO obtenerEstadisticasCompletas(String empresaNombre, String mesYYYYMM);
+    ReporteResponseDTO rastrearPorFolioYToken(String folio, String token);
 }
